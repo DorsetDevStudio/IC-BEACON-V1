@@ -24,9 +24,9 @@ HardwareSerial CIV_SERIAL(1);
 
 String 
 	previous_mode		=	"0200",						// last mode reported to cloud
-	mode				= 	"0200", 					// will be reported raw i.e 0203 == CW
+	mode				=	"0200", 					// will be reported raw i.e 0203 == CW
 	current_frequency 	=	"0007125000",				// will be reported in Hz
-	previous_frequency 	= 	"0007125000"				// last frequency report to cloud	
+	previous_frequency 	=	"0007125000"				// last frequency report to cloud	
 	;
 
 uint32_t device_id = ESP.getEfuseMac() & 0xFFFFFFFF; 	// get 32 bit device id
@@ -49,6 +49,10 @@ void run_periodically(function<void(void)> function, int interval)
     }).detach();
 }
  
+ /**
+  * @brief TODO: add code to ping the device_id, current_frequency, and mode to the cloud
+  * 
+  */
 void reportToCloud() 
 {
 	if (strcmp(previous_frequency.c_str(), current_frequency.c_str()) != 0
