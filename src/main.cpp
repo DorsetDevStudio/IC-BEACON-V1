@@ -81,7 +81,7 @@ void reportToCloud()
 		
 		DEBUG_SERIAL.println((String) "Device ID " + (*ps_data).device_id + " Reported to cloud Frequency = " + (*ps_data).current_frequency + " Hz , MODE = " + (*ps_data).mode );
 	
-		String request = SERVER_HOSTNAME + SERVER_ENDPOINT + "?device_id=" + (*ps_data).device_id + "&freq=" + (*ps_data).current_frequency + "&mode=" + (*ps_data).mode;
+		String request = SERVER_HOSTNAME + SERVER_ENDPOINT + "?device_id=" + (*ps_data).device_id + "&freq=" + (*ps_data).current_frequency + "&mode=" + (*ps_data).mode + "&device_name=" + (*ps_data).device_name;
 
 		http.begin(request.c_str());
 		http.setUserAgent("Mozilla/5.0 Gecko/20221102");
