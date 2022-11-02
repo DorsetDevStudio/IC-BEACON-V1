@@ -2,7 +2,7 @@
  * @file main.cpp
  * @author G5STU - https://station-master.online
  * @brief  Simple icom ham radio frequency sniffer
- * @version 0.1
+ * @version IC-BEACON-V1 0.1
  * @date 2022-11-01
  * 
  * @copyright Copyright (c) 2022
