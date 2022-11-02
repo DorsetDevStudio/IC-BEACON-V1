@@ -22,14 +22,17 @@ using namespace std;
 
 HardwareSerial CIV_SERIAL(1);
 
-String 
-	previous_mode		=	"0200",						// last mode reported to cloud
-	mode				=	"0200", 					// will be reported raw i.e 0203 == CW
-	current_frequency 	=	"0007125000",				// will be reported in Hz
-	previous_frequency 	=	"0007125000"				// last frequency report to cloud	
-	;
+struct s_data {
+	uint32_t device_id			=	ESP.getEfuseMac() & 0xFFFFFFFF;
+	String previous_mode 		=	"0";	// last mode reported to cloud
+	String mode					=	"0";	// will be reported raw i.e 0203 == CW
+	String current_frequency 	=	"0";	// will be reported in Hz
+	String previous_frequency 	=	"0";		// last frequency report to cloud	
+	} s_data;
 
-uint32_t device_id = ESP.getEfuseMac() & 0xFFFFFFFF; 	// get 32 bit device id
+auto *ps_data = &s_data;
+
+//uint32_t device_id = ESP.getEfuseMac() & 0xFFFFFFFF; 	// get 32 bit device id
 
 /**
  * @brief call `function` every `interval` miliseconds
@@ -55,11 +58,11 @@ void run_periodically(function<void(void)> function, int interval)
   */
 void reportToCloud() 
 {
-	if (strcmp(previous_frequency.c_str(), current_frequency.c_str()) != 0
-	|| strcmp(previous_mode.c_str(), mode.c_str()) != 0){
-		previous_frequency = current_frequency;
-		previous_mode = mode;
-		DEBUG_SERIAL.println((String) "Device ID " + device_id + " Reported to cloud Frequency = " + current_frequency + " Hz , MODE = " + mode );
+	if (strcmp((*ps_data).previous_frequency.c_str(), (*ps_data).current_frequency.c_str()) != 0
+	|| strcmp((*ps_data).previous_mode.c_str(), (*ps_data).mode.c_str()) != 0){
+		(*ps_data).previous_frequency = (*ps_data).current_frequency;
+		(*ps_data).previous_mode = (*ps_data).mode;
+		DEBUG_SERIAL.println((String) "Device ID " + (*ps_data).device_id + " Reported to cloud Frequency = " + (*ps_data).current_frequency + " Hz , MODE = " + (*ps_data).mode );
 	}	
 }
 
@@ -93,11 +96,11 @@ void monitor_radio_bg_task()
 				CIV_SERIAL.read(buff, available_bytes);						// read incomming message
 
 				if(available_bytes == 11) {									// frequency change			
-					current_frequency = storePrintf("%02x%02x%02x%02x%02x", 
+					(*ps_data).current_frequency = storePrintf("%02x%02x%02x%02x%02x", 
 						buff[9], buff[8], buff[7], buff[6], buff[5]);  		// parse the current frequency from the C-IV message
 					}
 				else if(available_bytes == 8) 								// report mode as raw values so we can support any modes from the server side
-					mode = storePrintf("%02x%02x", buff[6], buff[5]); 		// parse the current mode from the C-IV message
+					(*ps_data).mode = storePrintf("%02x%02x", buff[6], buff[5]); 		// parse the current mode from the C-IV message
 
 				else														// other message we don't care about
 					DEBUG_SERIAL.printf("Unknown command length = %i\n",available_bytes);	
