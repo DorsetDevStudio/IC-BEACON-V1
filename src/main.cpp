@@ -20,7 +20,7 @@
 using namespace std;
 
 // Serial config
-#define CIV_PIN_RX 37
+#define CIV_PIN_RX 25// 37
 #define DEBUG_SERIAL Serial
 HardwareSerial CIV_SERIAL(1);
 
@@ -45,7 +45,6 @@ struct s_data {
 	String previous_frequency = "0";// last frequency report to cloud	
 	} s_data;
 
-auto *ps_data = &s_data;
 
 //uint32_t device_id = ESP.getEfuseMac() & 0xFFFFFFFF; 	// get 32 bit device id
 
@@ -73,15 +72,15 @@ void run_periodically(function<void(void)> function, int interval)
   */
 void reportToCloud() 
 {
-	if (strcmp((*ps_data).previous_frequency.c_str(), (*ps_data).current_frequency.c_str()) != 0
-	|| strcmp((*ps_data).previous_mode.c_str(), (*ps_data).mode.c_str()) != 0){
+	if (strcmp(s_data.previous_frequency.c_str(), s_data.current_frequency.c_str()) != 0
+	|| strcmp(s_data.previous_mode.c_str(), s_data.mode.c_str()) != 0){
 		
-		(*ps_data).previous_frequency = (*ps_data).current_frequency;
-		(*ps_data).previous_mode = (*ps_data).mode;
+		s_data.previous_frequency = s_data.current_frequency;
+		s_data.previous_mode = s_data.mode;
 		
-		DEBUG_SERIAL.println((String) "Device ID " + (*ps_data).device_id + " Reported to cloud Frequency = " + (*ps_data).current_frequency + " Hz , MODE = " + (*ps_data).mode );
+		DEBUG_SERIAL.println((String) "Device ID " + s_data.device_id + " Reported to cloud Frequency = " + s_data.current_frequency + " Hz , MODE = " + s_data.mode );
 	
-		String request = SERVER_HOSTNAME + SERVER_ENDPOINT + "?device_id=" + (*ps_data).device_id + "&freq=" + (*ps_data).current_frequency + "&mode=" + (*ps_data).mode + "&device_name=" + (*ps_data).device_name;
+		String request = SERVER_HOSTNAME + SERVER_ENDPOINT + "?device_id=" + s_data.device_id + "&freq=" + s_data.current_frequency + "&mode=" + s_data.mode + "&device_name=" + s_data.device_name;
 
 		http.begin(request.c_str());
 		http.setUserAgent("Mozilla/5.0 Gecko/20221102");
@@ -123,12 +122,12 @@ void monitor_radio_bg_task()
 
 				if(available_bytes == 11) {		
 												// frequency change			
-					(*ps_data).current_frequency = storePrintf("%02x%02x%02x%02x%02x", 
+					s_data.current_frequency = storePrintf("%02x%02x%02x%02x%02x", 
 						buff[9], buff[8], buff[7], buff[6], buff[5]);  		// parse the current frequency from the C-IV message
 
 				}
 				else if(available_bytes == 8) 								// report mode as raw values so we can support any modes from the server side
-					(*ps_data).mode = storePrintf("%02x%02x", buff[6], buff[5]); 		// parse the current mode from the C-IV message
+					s_data.mode = storePrintf("%02x%02x", buff[6], buff[5]); 		// parse the current mode from the C-IV message
 
 				else														// other message we don't care about
 					DEBUG_SERIAL.printf("Unknown command length = %i\n",available_bytes);	
