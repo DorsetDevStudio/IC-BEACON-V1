@@ -20,7 +20,8 @@
 using namespace std;
 
 // Serial config
-#define CIV_PIN_RX 25// 37
+//#define CIV_PIN_RX 25 // (small board)
+#define CIV_PIN_RX 37 // (S2)
 #define DEBUG_SERIAL Serial
 HardwareSerial CIV_SERIAL(1);
 
@@ -121,7 +122,7 @@ void monitor_radio_bg_task()
 				CIV_SERIAL.read(buff, available_bytes);						// read incomming message
 
 				if(available_bytes == 11) {		
-												// frequency change			
+										// frequency change			
 					s_data.current_frequency = storePrintf("%02x%02x%02x%02x%02x", 
 						buff[9], buff[8], buff[7], buff[6], buff[5]);  		// parse the current frequency from the C-IV message
 
@@ -163,7 +164,7 @@ void connent_to_wifi()
 
 		DEBUG_SERIAL.println("\nWIFI - FAILED TO CONNECT. will retry in 5 seconds");
 		delay(5000);
-		ESP.restart();
+		connent_to_wifi();
 
 	}
 			
